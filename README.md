@@ -49,8 +49,61 @@
     end (while loop)
 
 ``````
+<h3>Program:</h3>
 
-<hr>
+```python
+import heapq
+
+class Node:
+    def __init__(self, row, col, cost, heuristic):
+        self.row = row
+        self.col = col
+        self.cost = cost
+        self.heuristic = heuristic
+        self.total_cost = cost + heuristic
+
+    def __lt__(self, other):
+        return self.total_cost < other.total_cost
+
+def is_valid(row, col, grid):
+    return 0 <= row < len(grid) and 0 <= col < len(grid[0]) and grid[row][col] != -1
+
+def calculate_heuristic(row, col, goal):
+    return abs(row - goal[0]) + abs(col - goal[1])
+
+def astar(grid, start, goal):
+    rows, cols = len(grid), len(grid[0])
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+    open_set = [Node(start[0], start[1], 0, calculate_heuristic(start[0], start[1], goal))]
+    closed_set = set()
+
+    while open_set:
+        current_node = heapq.heappop(open_set)
+
+        if (current_node.row, current_node.col) == goal:
+            # Reconstruct path
+            path = [(current_node.row, current_node.col)]
+            while current_node.parent:
+                current_node = current_node.parent
+                path.append((current_node.row, current_node.col))
+            return path[::-1]
+
+        closed_set.add((current_node.row, current_node.col))
+
+        for dr, dc in directions:
+            new_row, new_col = current_node.row + dr, current_node.col + dc
+
+            if is_valid(new_row, new_col, grid) and (new_row, new_col) not in closed_set:
+                new_cost = current_node.cost + grid[new_row][new_col]
+                new_heuristic = calculate_heuristic(new_row, new_col, goal)
+                new_node = Node(new_row, new_col, new_cost, new_heuristic)
+                new_node.parent = current_node
+
+                if new_node not in open_set:
+                    heapq.heappush(open_set, new_node)
+
+``` 
 <h2>Sample Graph I</h2>
 <hr>
 
